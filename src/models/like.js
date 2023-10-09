@@ -1,5 +1,23 @@
 module.exports = (sequelize, DataTypes) => {
-    const Like = sequelize.define('Like', {}, { underscored: true });
+  const Like = sequelize.define("Like", {}, { underscored: true });
 
-    return Like;
-}
+  Like.associate = (db) => {
+    Like.belongsTo(db.User, {
+      foreignKey: {
+        name: "userId",
+        allowNull: false,
+      },
+      onDelete: "RESTRICT",
+    });
+
+    Like.belongsTo(db.Post, {
+      foreignKey: {
+        name: "postId",
+        allowNull: false,
+      },
+      onDelete: "RESTRICT", //ห้ามลบ
+    });
+  };
+
+  return Like;
+};
