@@ -44,3 +44,10 @@ const registerSchema = Joi.object({
 });
 
 exports.validateRegister = validate(registerSchema);
+
+const loginSchema = Joi.object({
+  emailOrMobile: Joi.string().required(),
+  password: Joi.string().required()
+});
+
+exports.validateLogin = validate(loginSchema);
