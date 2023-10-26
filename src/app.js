@@ -28,7 +28,7 @@ app.use(
 );
 app.use(helmet());
 app.use(cors());
-app.use(express.json());
+app.use(express.json()); //parsing req body(ในรูปแบบjson)
 
 app.use('/auth', authRoute);
 app.use('/users', authenticateMiddleware, userRoute);
