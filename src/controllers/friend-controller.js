@@ -54,7 +54,7 @@ exports.acceptFriend = async (req, res, next) => {
       }
     );
     if (totalRowUpdated === 0) {
-        createError('this user not sent request to you', 400);
+      createError("this user not sent request to you", 400);
     }
     res.status(200).json({ message: "success add friend" });
   } catch (err) {
@@ -64,24 +64,38 @@ exports.acceptFriend = async (req, res, next) => {
 
 exports.deleteFriend = async (req, res, next) => {
   try {
-    // DELETE FROM friends 
+    // DELETE FROM friends
     // WHERE requester_id = req.params.friendId AND accepter_id = req.user.id
     // OR requester_id = req.user.id AND accepter_id = req.params.friendId
     const totalDelete = await Friend.destroy({
       where: {
         [Op.or]: [
           { requesterId: req.params.friendId, accepterId: req.user.id },
-          { requesterId: req.user.id, accepterId: req.params.friendId }
-        ]
-      }
-    })
+          { requesterId: req.user.id, accepterId: req.params.friendId },
+        ],
+      },
+    });
 
     if (totalDelete === 0) {
-      createError('You do not have relationship with this friend', 400)
+      createError("You do not have relationship with this friend", 400);
     }
 
     res.status(204).json();
   } catch (err) {
     next(err);
   }
-}
+};
+
+exports.getFriendRequestData = async (req, res, next) => {
+  try {
+    const requestData = await Friend.findOne({
+      where: {
+        status: FRIEND_PENDING,
+        accepterId: req.user.id,
+      },
+    });
+    res.status(200).json({ requestData });
+  } catch (err) {
+    next(err);
+  }
+};
