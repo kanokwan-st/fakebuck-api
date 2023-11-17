@@ -1,5 +1,5 @@
 const { Op } = require("sequelize");
-const { Friend } = require("../models");
+const { Friend, User } = require("../models");
 const createError = require("../utils/create-error");
 const { FRIEND_PENDING, FRIEND_ACCEPTED } = require("../config/constant");
 
@@ -88,13 +88,89 @@ exports.deleteFriend = async (req, res, next) => {
 
 exports.getFriendRequestData = async (req, res, next) => {
   try {
-    const requestData = await Friend.findOne({
+    const requestData = await Friend.findAll({
       where: {
         status: FRIEND_PENDING,
         accepterId: req.user.id,
       },
+      include: [
+        {
+          model: User,
+          as: "Requester",
+          attributes: {
+            exclude: ["password"],
+          },
+        },
+      ],
     });
     res.status(200).json({ requestData });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.friendSuggestion = async (req, res, next) => {
+  try {
+    const RelationData = await Friend.findAll({
+      where: {
+        [Op.or]: [{ requesterId: req.user.id }, { accepterId: req.user.id }],
+      },
+    });
+    const relateId = RelationData.map((el) => {
+      if (el.requesterId === req.user.id) {
+        return el.accepterId;
+      } else {
+        return el.requesterId;
+      }
+    });
+    relateId.push(req.user.id); //รวม id ของ user เข้าไปด้วย
+
+    const allUser = await User.findAll();
+    const allUserId = allUser.map((el) => el.id);
+    const notRelateId = allUserId.filter((el) => !relateId.includes(el));
+
+    const friendSuggest = await User.findAll({
+      where: {
+        id: notRelateId,
+      },
+      attributes: {
+        exclude: ["password"],
+      },
+    });
+
+    res.status(200).json({ friendSuggest });
+  } catch {
+    next(err);
+  }
+};
+
+exports.allFriend = async (req, res, next) => {
+  try {
+    const relationData = await Friend.findAll({
+      where: {
+        status: FRIEND_ACCEPTED,
+        [Op.or]: [{ requesterId: req.user.id }, { accepterId: req.user.id }],
+      },
+    });
+
+    const friendId = relationData.map((el) => {
+      if (el.requesterId === req.user.id) {
+        return el.accepterId;
+      } else {
+        return el.requesterId;
+      }
+    });
+
+    const friendData = await User.findAll({
+      where: {
+        id: friendId
+      },
+      attributes: {
+        exclude: "password"
+      }
+    })
+
+    res.status(200).json({ friendData });
   } catch (err) {
     next(err);
   }
