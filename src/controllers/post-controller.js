@@ -63,19 +63,19 @@ exports.getAllPostIncludeFriend = async (req, res, next) => {
           include: {
             model: User,
             attributes: {
-              exclude: ['password']
-            }
-          }
+              exclude: ["password"],
+            },
+          },
         },
         {
           model: Comment,
           include: {
             model: User,
             attributes: {
-              exclude: ['password']
-            }
-          }
-        }
+              exclude: ["password"],
+            },
+          },
+        },
       ],
     });
     res.status(200).json({ posts });
@@ -99,3 +99,33 @@ exports.deletePost = async (req, res, next) => {
     next(err);
   }
 };
+
+// exports.editPost = async (req, res, next) => {
+//   try {
+//     // const value = validateCreatePost({
+//     //   title: req.body.title,
+//     //   image: req.file?.path,
+//     // });
+
+//     // if (value.image) {
+//     //   value.image = await cloudinary.upload(value.image); //ได้ url ที่อัพโหลดที่ cloud
+//     // }
+
+//     // value.userId = req.user.id;
+
+//     const value = {
+//       // title: req.body.title,
+//       title: 'tryTitle3',
+//       image: req.file?.path,
+//     };
+//     const post = await Post.update(value, {
+//       where: {
+//         id: req.params.postId,
+//       },
+//     });
+
+//     res.status(200).json({ message: "success edit post" });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
